@@ -1,0 +1,11 @@
+import { useRouteError } from "react-router-dom"
+
+export default function Error() {
+    const error = useRouteError()
+    
+    return (
+        <>
+        <pre>{error.status} - {error.statusText}</pre>
+        </>
+    )
+}

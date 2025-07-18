@@ -1,0 +1,98 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+header {
+  height: 15vh;
+  background-color: white;
+}
+
+
+/* App.css */
+
+/* Base styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s;
+}
+
+header a:hover {
+  color: #1e90ff;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Light mode */
+body {
+  background-color: white;
+  color: #1a1a1a;
+}
+
+/* Dark mode */
+.dark body {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
+.dark header {
+  background-color: #1f2937;
+}
+
+.dark footer {
+  background-color: #374151;
+}
+
+.dark a:hover {
+  color: #93c5fd;
+}
+
+/* Responsive video background container fix */
+main {
+  overflow: hidden;
+  position: relative;
+}
+
+video {
+  z-index: 0;
+}
+
