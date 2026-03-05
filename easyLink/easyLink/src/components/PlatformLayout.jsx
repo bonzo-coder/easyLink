@@ -1,14 +1,20 @@
-import { Outlet } from "react-router-dom"
-import { useLocation, useNavigate } from 'react-router-dom'
-import { useLanguage } from '../assets/LanguageContext';
+import { Outlet } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useLanguage } from "../assets/LanguageContext";
 import * as Machines from "../assets/machines";
 import { machinesTableData } from "../assets/machinesTableData.jsx";
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
+
+const machineImageManifest = import.meta.glob(
+  "../../public/img/*.{jpg,jpeg,png,avif}",
+  { eager: true, import: "default" }
+);
 
 export default function MachineLayout() {
 
     let navigate = useNavigate();
-    
+
     let location = useLocation();
 
     const  {language} = useLanguage();
@@ -17,16 +23,40 @@ export default function MachineLayout() {
     console.log(location)
 
     const machineModel = location.state.from.model;
-    
+
 
     const asArray = Object.entries(texts);
     const filtered = asArray.filter(([key, value]) => value.model === machineModel);
+    const machineDetails = filtered[0]?.[1];
 
-  console.log(machineModel)
-  console.log(filtered[0][1])
+    if (!machineDetails) {
+      return null;
+    }
+
+  
+
+  const gallerySources = useMemo(() => {
+    if (!machineDetails?.model) return [];
+    const slug = machineDetails.model.toLowerCase();
+    const regex = new RegExp(`/(${slug})(\\d+)\\.(jpe?g|png|avif)$`, "i");
+
+    return Object.entries(machineImageManifest)
+      .map(([path, asset]) => {
+        const match = path.toLowerCase().match(regex);
+        if (!match) return null;
+        return {
+          src: typeof asset === "string" ? asset : asset?.default,
+          index: Number(match[2]) || 0,
+          fileName: path.split("/").pop(),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.index - b.index)
+      .map((entry) => entry.src ?? `/img/${entry.fileName}`);
+  }, [machineDetails?.model]);
 
 // Pobierz model maszyny (np. "mx", "bx", "bxx" itd.)
-const machineType = filtered[0][1].model.slice(0, 2).toLowerCase(); // np. "mx", "bx", "ax", "bxx" itd.
+const machineType = machineDetails?.model.slice(0, 2).toLowerCase(); // np. "mx", "bx", "ax", "bxx" itd.
 console.log(machineType);
 // Stan filtrów
 const [filters, setFilters] = useState({
@@ -90,6 +120,11 @@ const filteredData = useMemo(() => {
 
 // Dodaj stan do modala
 const [showImgModal, setShowImgModal] = useState(false);
+const [isClient, setIsClient] = useState(false);
+
+useEffect(() => {
+  setIsClient(true);
+}, []);
 
 // Dodaj ten efekt na początku komponentu
 useEffect(() => {
@@ -100,48 +135,89 @@ useEffect(() => {
 return (
   <>
     <nav className="host-nav">
-      <div className="device-container" style={{position: "relative"}}>
+      <div className="main-body-part">
+      <div className="device-container" style={{ position: "relative" }}>
         <button
           onClick={() => navigate("/platforms")}
           className="back-button-absolute"
         >
           {language === "en" ? "Back" : "Wróć"}
         </button>
-        <h2 className="device-title">{filtered[0][1].title}</h2>
-        <div key={filtered[0][1].model} className="device-grid">
+        <h2 className="device-title">{machineDetails?.title}</h2>
+        <div key={machineDetails?.model} className="device-grid">
           <img
-            src={`../../public/img/${filtered[0][1].model}.png`}
-            alt={`machine ${filtered[0][1].model} table`}
-            className="device-image"
-            style={{cursor: "zoom-in"}}
+            src={`../../public/img/${machineDetails?.model}.png`}
+            alt={`machine ${machineDetails?.model} table`}
+            className="device-image-platformlayout"
+            style={{ cursor: "zoom-in" }}
             onClick={() => setShowImgModal(true)}
           />
-          <div>{filtered[0][1].text}</div>
-          <div>{filtered[0][1].additionalText}</div>
+          <div className="texts-machine">
+            <div>{machineDetails?.text}</div>
+            <div>{machineDetails?.additionalText}</div>
+          </div>
+          
         </div>
         {/* MODAL Z POWIĘKSZONYM OBRAZEM */}
-        {showImgModal && (
-          <div
-            className="img-modal-overlay"
-            onClick={() => setShowImgModal(false)}
-          >
-            <img
-              src={`../../public/img/${filtered[0][1].model}.png`}
-              alt={`machine ${filtered[0][1].model} full`}
-              className="img-modal-expanded"
-              onClick={e => e.stopPropagation()}
-            />
-            <button
-              className="img-modal-close"
+        {isClient && showImgModal &&
+          createPortal(
+            <div
+              className="img-modal-overlay"
+              role="dialog"
+              aria-modal="true"
               onClick={() => setShowImgModal(false)}
-              aria-label="Close"
-            >✕</button>
-          </div>
+            >
+              <img
+                src={`../../public/img/${machineDetails?.model}.png`}
+                alt={`machine ${machineDetails?.model} full`}
+                className="img-modal-expanded"
+                onClick={e => e.stopPropagation()}
+              />
+              <button
+                className="img-modal-close"
+                onClick={() => setShowImgModal(false)}
+                aria-label={language === "pl" ? "Zamknij podgląd" : "Close preview"}
+              >✕</button>
+            </div>,
+            document.body
+          )}
+      </div>
+
+      <div className="machine-gallery-block">
+        {gallerySources.length > 0 && (
+          <section
+            className="machine-gallery"
+            aria-label={language === "pl" ? "Galeria zdjęć urządzenia" : "Machine photo gallery"}
+          >
+            <div className="machine-gallery__mask">
+              <div
+                className="machine-gallery__track"
+                data-loop={gallerySources.length > 1}
+              >
+                {(gallerySources.length > 1
+                  ? [...gallerySources, ...gallerySources]
+                  : gallerySources
+                ).map((src, idx) => (
+                  <div className="machine-gallery__item" key={`${src}-${idx}`}>
+                    <img
+                      src={src}
+                      alt={`${machineDetails?.title || machineDetails?.model} ${language === "pl" ? "zdjęcie" : "photo"} ${(idx % gallerySources.length) + 1}`}
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         )}
       </div>
+      </div>
     </nav>
-    <div style={{margin: "2em 0", width: "100%", maxWidth: "100vw"}}>
-      <h3 style={{marginBottom: "1em", fontWeight: 600, fontSize: "1.3em", textAlign: "center"}}>{language === "pl" ? "Filtruj parametry" : "Filter parameters"}</h3>
+    
+    <div className="machine-table" style={{ margin: "2em 0", width: "100%", maxWidth: "100vw" }}>
+      <h3 style={{ marginBottom: "1em", fontWeight: 600, fontSize: "1.3em", textAlign: "center" }}>
+        {language === "pl" ? "Filtruj parametry" : "Filter parameters"}
+      </h3>
       <div className="table-filter-selects">
         <select
     value={filters.capacity}
@@ -189,7 +265,7 @@ return (
     ))}
   </select>
       </div>
-      <div style={{overflowX: "auto"}}>
+      <div style={{ overflowX: "auto" }}>
         <table style={{
           borderCollapse: "collapse",
           width: "100%",
@@ -214,12 +290,12 @@ return (
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan={tableData[0] ? Object.keys(tableData[0]).length : 1} style={{textAlign: "center", padding: "2em", color: "#aaa"}}>
+                <td colSpan={tableData[0] ? Object.keys(tableData[0]).length : 1} style={{ textAlign: "center", padding: "2em", color: "#aaa" }}>
                   {language === "pl" ? "Brak wyników" : "No results"}
                 </td>
               </tr>
             ) : filteredData.map((row, idx) => (
-              <tr key={idx} style={{borderBottom: "1px solid #f0f0f0"}}>
+              <tr key={idx} style={{ borderBottom: "1px solid #f0f0f0" }}>
                 {Object.keys(row).map(col => (
                   <td key={col} style={{
                     padding: "0.7em 1em",

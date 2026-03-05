@@ -70,6 +70,24 @@ export const machines = {
             additionalText: "",
             industries: "Branże",
             },
+        marcoTables: {
+            model: "marco-tables",
+            title: "Stoły podnośnikowe MARCO",
+            text: "",
+            additionalText: "",
+        },
+        gruseTables: {
+            model: "gruse-tables",
+            title: "Stoły podnośnikowe GRUSE",
+            text: "",
+            additionalText: "",
+        },
+        customTables: {
+            model: "custom-tables",
+            title: "Stoły podnośnikowe NA WYMIAR",
+            text: "",
+            additionalText: "",
+        },
     },
     en: {
         1: {
@@ -142,5 +160,23 @@ export const machines = {
             additionalText: "",
             industries: "Branże",
             },
+        marcoTables: {
+            model: "marco-tables",
+            title: "MARCO Lift tables",
+            text: "",
+            additionalText: "",
+        },
+        gruseTables: {
+            model: "gruse-tables",
+            title: "GRUSE Lift tables",
+            text: "",
+            additionalText: "",
+        },
+        customTables: {
+            model: "custom-tables",
+            title: "CUSTOM Lift tables",
+            text: "",
+            additionalText: "",
+        },
     },
   };

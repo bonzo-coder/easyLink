@@ -21,6 +21,9 @@ return (
     <div className="dropdown-menu">
       <ul>
        {machinesList}
+        {/* <NavLink key={marcoTables} className="NavLink" to={marcoTables} state={{ from: texts[key] }} > {texts[key].title} </NavLink>);
+        <NavLink key={gruseTables} className="NavLink" to={gruseTables} state={{ from: texts[key] }}> {texts[key].title} </NavLink>);
+        <NavLink key={customTables} className="NavLink" to={customTables}state={{ from: texts[key] }}> {texts[key].title} </NavLink>); */}
       </ul>
     </div>
   );

@@ -1,13 +1,12 @@
 import React from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { Sun, Moon } from "lucide-react";
-import Switch from '@mui/material/Switch';
-import CustomizedSwitches from "../components/ui/button";
 import { labels } from "../assets/texts";
 import PlatformsList from "../components/platforms/PlaformsList.jsx"
 import { useLanguage } from '../assets/LanguageContext.jsx';
 import MenuIcon from '@mui/icons-material/Menu'; // lub inna ikona menu
 import CloseIcon from '@mui/icons-material/Close'; // do zamykania
+import easyLogo from  '../../public/img/easylinklogo.png';
 
 export default function Header() {
     
@@ -23,7 +22,6 @@ export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
     const [isDesktop, setIsDesktop] = React.useState(window.innerWidth > 900);
 
-    const toggleLanguage = () => setLanguage(language === "pl" ? "en" : "pl");
     const toggleDarkMode = () => setDarkMode(!darkMode);
 
     const lang = labels[language];
@@ -39,8 +37,19 @@ export default function Header() {
         document.getElementById("header").style.height = "200px";
     }
     }
+
+    React.useEffect(() => {
+      // set an initial header height CSS variable that won't change on scroll
+      const setHeaderInitialVar = () => {
+        const el = document.getElementById('header');
+        if (el) document.documentElement.style.setProperty('--header-height-initial', `${el.offsetHeight}px`);
+      };
+      setHeaderInitialVar();
+      window.addEventListener('resize', setHeaderInitialVar);
+      return () => window.removeEventListener('resize', setHeaderInitialVar);
+    }, []);
     
-    function switchTheme(e) {
+    function switchTheme() {
         if (darkMode) {
             document.documentElement.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
@@ -53,9 +62,7 @@ export default function Header() {
     switchTheme();
 
     const [isDropdownVisible, setDropdownVisible] = React.useState(false);
-console.log(isDropdownVisible);
-console.log( isDesktop);
-console.log( isDesktop === true)
+
     const handleMouseEnter = () => {
         console.log("Mouse entered dropdown area");
         setDropdownVisible(true);
@@ -87,17 +94,8 @@ console.log( isDesktop === true)
             }}
           >
             <div className="logo-container">
-                <Link className="site-logo fancy" id="logo" to="/" style={{marginRight: "2em"}}>
-                <span>E</span>
-                <span>A</span>
-                <span>S</span>
-                <span>Y</span>
-                <span>_</span>
-                <span>L</span>
-                <span>I</span>
-                <span>N</span>
-                <span>K</span>
-                </Link>
+                
+                <img src={easyLogo} alt="Easy Link Logo" id="logo"  onClick={() => navigate("/")}></img>
             </div>
             {/* Hamburger icon for mobile */}
             <button
@@ -145,19 +143,19 @@ console.log( isDesktop === true)
                   )}
                 </div>
                 <NavLink to="applications" id="applications" style={({isActive}) => isActive ? activeStyles : null}>{lang.applications}</NavLink>
-                <NavLink to="industries" id="industries" style={({isActive}) => isActive ? activeStyles : null}>{lang.industries}</NavLink>
+                <NavLink to="accessories" id="accessories" style={({isActive}) => isActive ? activeStyles : null}>{lang.accessories}</NavLink>
                 <NavLink to="lifts" id="lifts" style={({isActive}) => isActive ? activeStyles : null}>{lang.lifts}</NavLink>
                 <NavLink to="palletizer" id="palletizer" style={({isActive}) => isActive ? activeStyles : null}>{lang.palletizer}</NavLink>
                 <NavLink to="contact" id="contact" style={({isActive}) => isActive ? activeStyles : null}>{lang.contact}</NavLink>
               </nav>
-              <div className="switches" style={{display: "flex", alignItems: "center", gap: "1.5em", marginLeft: "2em"}}>
+              <div className="switches" style={{display: "flex", flexDirection:"column", alignItems: "center", gap: "1.5em", marginLeft: "2em"}}>
                 {/* Language Switch */}
                 <button
-                  className={`lang-switch ${language === "pl" ? "" : "active"}`}
+                  className={`lang-switch ${language === "en" ? "" : "active"}`}
                   onClick={() => setLanguage("pl")}
                 >PL</button>
                 <button
-                  className={`lang-switch ${language === "en" ? "" : "active"}`}
+                  className={`lang-switch ${language === "pl" ? "" : "active"}`}
                   onClick={() => setLanguage("en")}
                 >EN</button>
                 {/* Dark Mode Switch */}
@@ -230,12 +228,12 @@ console.log( isDesktop === true)
                     {lang.applications}
                   </NavLink>
                   <NavLink
-                    to="industries"
-                    id="industries"
+                    to="accessories"
+                    id="accessories"
                     style={({isActive}) => isActive ? activeStyles : null}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {lang.industries}
+                    {lang.accessories}
                   </NavLink>
                   <NavLink
                     to="lifts"
